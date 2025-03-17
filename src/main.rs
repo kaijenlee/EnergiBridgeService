@@ -2,6 +2,7 @@ mod cpu;
 mod gpu;
 mod memory;
 mod process;
+mod service;
 mod util;
 
 use clap::Parser;
@@ -16,6 +17,7 @@ use std::thread::sleep;
 use std::time::{Duration, Instant, SystemTime};
 use sysinfo::{System, SystemExt};
 
+use crate::service::run_server;
 use util::{collect, execute_command, print_header, print_results};
 
 #[derive(Parser, Debug, Clone)]
