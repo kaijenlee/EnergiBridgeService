@@ -30,7 +30,7 @@ struct Args {
     #[arg(short, long, default_value = ",")]
     separator: String,
 
-    // Where to save the output of the command
+    /// Where to save the output of the command
     #[arg(short, long, required = false)]
     command_output: Option<String>,
 
@@ -42,34 +42,34 @@ struct Args {
     #[arg(short, long, default_value_t = 0)]
     max_execution: u32,
 
-    // enable to measure the GPU power consumption
+    /// enable to measure the GPU power consumption
     #[arg(short, long, default_value_t = false)]
     gpu: bool,
 
-    // Set energibridge to run as a service and listen for rpc calls
+    /// Set energibridge to run as a service and listen for rpc calls
     #[arg(short, long, default_value_t = false)]
     use_as_service: bool,
 
-    // print the summary of the energy consumption
+    /// Set the port for the service
+    #[arg(short = 'p', long, default_value_t = 8095)]
+    service_port: u16,
+
+    /// print the summary of the energy consumption
     #[arg(long, default_value_t = false)]
     summary: bool,
 
-    // the command to execute
+    /// the command to execute
     #[clap(trailing_var_arg = true)]
     command: Vec<String>,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     // EXAMPLE https://gist.github.com/carstein/6f4a4fdf04ec002d5494a11d2cf525c7
     let args = Args::parse();
     let interval = Duration::from_millis(args.interval.into());
     let sep = args.separator.as_str();
     let collect_gpu = args.gpu;
-
-    if args.command.is_empty() {
-        eprintln!("Usage: {} <command>", "EnergiBridge");
-        exit(1);
-    }
 
     if interval < System::MINIMUM_CPU_UPDATE_INTERVAL {
         eprintln!(
@@ -78,7 +78,34 @@ fn main() {
         );
     }
 
-    measure_command(args.clone(), interval, sep, collect_gpu);
+    if args.use_as_service {
+        let handle = Arc::new(
+            run_server(
+                collect_gpu,
+                interval,
+                sep,
+                args.output.clone(),
+                args.summary.clone(),
+                args.service_port.clone(),
+            )
+            .await?,
+        );
+        let handle_clone = handle.clone();
+        ctrlc::set_handler(move || {
+            println!("\nReceived Ctrl+C, stopping...");
+            handle_clone.stop().unwrap()
+        })
+        .expect("Error setting Ctrl-C handler");
+        let final_handle = Arc::try_unwrap(handle).unwrap_or_else(|arc| (*arc).clone());
+        final_handle.stopped().await
+    } else {
+        if args.command.is_empty() {
+            eprintln!("Usage: {} <command>", "EnergiBridge");
+            exit(1);
+        }
+        measure_command(args.clone(), interval, sep, collect_gpu);
+    }
+    Ok(())
 }
 
 fn measure_command(args: Args, interval: Duration, sep: &str, collect_gpu: bool) {
