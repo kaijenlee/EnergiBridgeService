@@ -108,6 +108,7 @@ impl MeasurementHandler {
         collect_gpu: bool,
         interval: Duration,
     ) -> Result<(), String> {
+        let (tx, mut stop_signal) = mpsc::channel::<()>(1);
         {
             let mut is_currently_measuring = self.is_currently_measuring.lock().await;
             if *is_currently_measuring {
@@ -122,12 +123,12 @@ impl MeasurementHandler {
             *measurements_lock = Vec::new();
             let mut current_fn_measured = self.current_fn_measured.lock().await;
             *current_fn_measured = Some(function_name.clone());
-        }
 
-        let (tx, mut stop_signal) = mpsc::channel::<()>(1);
-        {
-            let mut tx_lock = self.tx.lock().await;
-            *tx_lock = Some(tx.clone());
+
+            {
+                let mut tx_lock = self.tx.lock().await;
+                *tx_lock = Some(tx.clone());
+            }
         }
         let mut sys = System::new_all();
         sys.refresh_all();
