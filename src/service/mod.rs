@@ -119,6 +119,7 @@ pub(crate) async fn run_server(
             ));
         }
     });
+    println!("Energibridge RPC server running on port {}.", port);
 
     Ok(server_handle)
 }

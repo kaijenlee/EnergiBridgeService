@@ -1,4 +1,5 @@
 use crate::collect;
+use crate::cpu;
 use crate::util::{print_header, print_results, process_summary};
 use jsonrpsee::types::error::INVALID_REQUEST_CODE;
 use jsonrpsee::types::ErrorObjectOwned;
@@ -130,6 +131,10 @@ impl MeasurementHandler {
                 *tx_lock = Some(tx.clone());
             }
         }
+
+        
+        #[cfg(not(target_os = "macos"))]
+        cpu::msr::start_rapl();
         let mut sys = System::new_all();
         sys.refresh_all();
         sleep(System::MINIMUM_CPU_UPDATE_INTERVAL).await;
