@@ -51,7 +51,7 @@ pub(crate) fn print_results(
 
 pub(crate) fn print_header(results: &HashMap<String, f64>, sep: &str, output: &mut dyn Write) {
     output
-        .write_all(format!("Delta{}Time", sep).as_bytes())
+        .write_all(format!("DELTA{}TIME", sep).as_bytes())
         .expect("Failed to write header");
     for key in results.keys().sorted() {
         output

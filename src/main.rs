@@ -34,7 +34,7 @@ struct Args {
     #[arg(short, long, required = false)]
     command_output: Option<String>,
 
-    /// Duration of the interval between two measurements in microseconds
+    /// Duration of the interval between two measurements in milliseconds
     #[arg(short, long, default_value_t = 200)]
     interval: u32,
 
