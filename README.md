@@ -84,26 +84,30 @@ cargo build -r;
 To run the script, use the following command:
 
 ```
-Usage: energibridge[.exe] [OPTIONS] [COMMAND]...
+Usage: energibridge [OPTIONS] [COMMAND]...
 
 Arguments:
-  [COMMAND]...
+  [COMMAND]...  the command to execute
 
 Options:
   -o, --output <OUTPUT>
-
+          
   -s, --separator <SEPARATOR>
           [default: ,]
   -c, --command-output <COMMAND_OUTPUT>
-
+          Where to save the output of the command
   -i, --interval <INTERVAL>
-          Duration of the interval between two measurements in micoseconds [default: 100]
+          Duration of the interval between two measurements in milliseconds [default: 200]
   -m, --max-execution <MAX_EXECUTION>
-          Define the maximum duration of the execution of the command in seconds, set to -1 to disable [default: 0]
+          Define the maximum duration of the execution of the command in seconds, set to 0 to disable [default: 0]
   -g, --gpu
-          Get GPU usage data
+          enable to measure the GPU power consumption
+  -u, --use-as-service
+          Set energibridge to run as a service and listen for rpc calls
+  -p, --service-port <SERVICE_PORT>
+          Set the port for the service [default: 8095]
       --summary
-          Provide a summary of the total energy consumption of running the command
+          print the summary of the energy consumption
   -h, --help
           Print help
   -V, --version
